@@ -1,0 +1,47 @@
+name: Maven release from GitHub Actions
+
+on:
+  workflow_dispatch:
+    inputs:
+      releaseVersion:
+        description: 'Release version'
+        required: true
+      developmentVersion:
+        description: 'Development version'
+        required: true
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/work'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Release
+        run: |
+          mvn -B -ntp release:prepare release:perform \
+            -DreleaseVersion=${{ github.event.inputs.releaseVersion }} \
+            -DdevelopmentVersion=${{ github.event.inputs.developmentVersion }} \
+            -Darguments="-Dgithub.packages.url=https://maven.pkg.github.com/${{ github.repository }}" \
+            -s .mvn/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
