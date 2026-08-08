@@ -7,8 +7,8 @@
 
   <properties>
     <github.packages.url>https://maven.pkg.github.com/normanstrydom/mvn-ref-test03</github.packages.url>
-    <mvn-ref-test01.version>1.0.8-Final</mvn-ref-test01.version>
-    <mvn-ref-test02.version>1.0.5-Final</mvn-ref-test02.version>
+    <mvn-ref-test01.version>1.0.11-Final</mvn-ref-test01.version>
+    <mvn-ref-test02.version>1.0.6-Final</mvn-ref-test02.version>
   </properties>
 
   <scm>
@@ -42,7 +42,7 @@
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/normanstrydom/mvn-ref-test01</url>
+      <url>${github.packages.url}</url>
     </repository>
   </repositories>
 
