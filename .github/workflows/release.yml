@@ -44,3 +44,33 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+
+      - name: Upload WAR to GitHub Release (gh CLI)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # If your Maven release tag is "1.2.3" (no v), change this to:
+          # TAG="${{ github.event.inputs.releaseVersion }}"
+          TAG="v${{ github.event.inputs.releaseVersion }}"
+
+          # Prefer WAR from common release plugin checkout/build paths
+          WAR_PATH="$(find target/checkout/target target . -type f -name '*.war' 2>/dev/null | head -n 1)"
+          if [ -z "${WAR_PATH}" ]; then
+            echo "No WAR file found."
+            exit 1
+          fi
+
+          # Create release if it doesn't exist yet
+          if ! gh release view "$TAG" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --repo "${{ github.repository }}" \
+              --title "$TAG" \
+              --notes "Release $TAG"
+          fi
+
+          # Upload/overwrite WAR asset
+          gh release upload "$TAG" "$WAR_PATH" \
+            --repo "${{ github.repository }}" \
+            --clobber
