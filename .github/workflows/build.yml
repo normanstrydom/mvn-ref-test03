@@ -1,0 +1,42 @@
+name: Maven build from GitHub Actions
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - deployment
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  build:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
+
+      - name: Configure Git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build and publish
+        run: |
+          mvn -B deploy \
+            -Dgithub.packages.url=https://maven.pkg.github.com/${{ github.repository }} \
+            -s .mvn/settings.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+
