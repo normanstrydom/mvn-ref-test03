@@ -40,3 +40,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
 
+      - name: Upload WAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: built-war
+          path: target/*.war
+          if-no-files-found: error
